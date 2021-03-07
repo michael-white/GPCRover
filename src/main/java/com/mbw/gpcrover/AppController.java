@@ -10,103 +10,85 @@ import java.util.Scanner;
 
 public class AppController {
 
+    private static int plateauLength = -1;
+    private static int plateauHeight = -1;
+    private static Properties properties = new Properties();
+    private static ArrayList<Rover> roverArray = new ArrayList<>();
+    public static Properties getProperties() { return properties; }
 
-    //read input from text file
-        // first line is the length and height of the plateau ( upper right position )
+    public static void setProperties(Properties properties) {
 
-        // each rovers input consist of 2 lines
-            //1. first line is the rovers position   int int orientation   or int,int,orientation
-            //2. second line is a series of instructions for the rover
-//    private static int plateauLength = -1;
-//    private static int plateauHeight = -1;
+        try {
+           getProperties().load(new FileInputStream("rover.properties"));
+        } catch(FileNotFoundException fnfe) {
+            // add logging
+        } catch(IOException ioe) {
+            //add loggin
+        }
+    }
 
-//    public int getPlateauLength() {
-//        return this.plateauLength;
-//    }
-//
-//    public int getPlateauHeight() {
-//        return plateauHeight;
-//    }
-//
-//    public void setPlateauLength(int plateauLength) {
-//        this.plateauLength = plateauLength;
-//    }
-//
-//    public void setPlateauHeight(int plateauHeight) {
-//        this.plateauHeight = plateauHeight;
-//    }
 
-    static int plateauLength = -1;
-    static int plateauHeight = -1;
+    public static ArrayList<Rover> getRoverArray() {
+        return roverArray;
+    }
+
+    public static int getPlateauLength() {
+        return plateauLength;
+    }
+
+    public static void setPlateauLength(int length) {
+        plateauLength = (length <= 0 ) ? Integer.parseInt(getProperties().getProperty("DEFAULT_PLATEAU_LENGTH")) : length;
+    }
+
+    public static int getPlateauHeight() {
+        return plateauHeight;
+    }
+
+    public static void setPlateauHeight(int height) {
+        plateauHeight = (height <= 0 ) ? Integer.parseInt(getProperties().getProperty("DEFAULT_PLATEAU_HEIGHT")) : height;
+    }
+
     public static void main(String[] args) {
 
-            ArrayList<Rover> roverArray = new ArrayList<>();
-            Properties properties = new Properties();
+        try {
+                setProperties(getProperties());
 
-            try {
-                properties.load(new FileInputStream("rover.properties"));
-
-                File file = new File( properties.getProperty("INSTRUCTION_FILE_NAME"));
+                File file = new File( getProperties().getProperty("INSTRUCTION_FILE_NAME"));
                 Scanner sc = new Scanner(file);
 
-                String line = "";
-                boolean DEFINE_PLATAUE = true;
+                String line;
+                boolean DEFINE_PLATEAU = true;
                 while (sc.hasNextLine()) {
 
                     line = sc.nextLine();
                     String[] pieces = line.split("\\s+");
 
-                    if(DEFINE_PLATAUE) {
-                            plateauLength = Integer.parseInt(pieces[0]);
-                            plateauHeight = Integer.parseInt(pieces[1]);
-                            DEFINE_PLATAUE = false;
+                    if(DEFINE_PLATEAU) {
+                         setPlateauLength(Integer.parseInt(pieces[0]));
+                         setPlateauHeight(Integer.parseInt(pieces[1]));
+                         DEFINE_PLATEAU = false;
                     } else {
-
                         Rover rover = setupNewRover(pieces);
                         if (rover != null) {
-                            roverArray.add(rover);
+                            getRoverArray().add(rover);
                             rover.processInstructions(sc.nextLine());
                         }
                     }
                 }
 
-
-                for(Rover r : roverArray) {
-                    r.printLocation();
+                for(Rover rover : getRoverArray()) {
+                    rover.printLocation();
                 }
 
-
-            } catch (FileNotFoundException fnfe) {
-                System.out.println("Unable to find rover instruction file.   Can not find the following file: " +  properties.getProperty("INSTRUCTION_FILE_NAME"));
-            } catch(IOException ioe) {
+          }catch(IOException ioe) {
                 System.out.println("IOException trying to read properties file: " + ioe.getMessage());
-            }
-
-  }
-
-  private static int encodeOrientation(String orientation) {
-
-        switch (orientation.toUpperCase()) {
-            case "N" : return 0;
-            case "W" : return 1;
-            case "S" : return 2;
-            case "E" : return 3;
-
-            default :  return -1;
-        }
+          }
   }
 
 
-
-  public static Rover setupNewRover(String[] startingValues) {
+  private static Rover setupNewRover(String[] startingValues) {
         if(startingValues.length == 3) {
-
-            String x = startingValues[0];
-            String y = startingValues[1];
-            String orientation = startingValues[2];
-
-            return new Rover(Integer.parseInt(x) , Integer.parseInt(y), encodeOrientation(orientation),  plateauLength,  plateauHeight);
-
+            return new Rover(Integer.parseInt(startingValues[0]) , Integer.parseInt(startingValues[1]), OrientationEnum.valueOf(startingValues[2]).ordinal(),  getPlateauLength(), getPlateauHeight());
         }
 
      return null;

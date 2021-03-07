@@ -25,7 +25,7 @@ public class Rover {
 
     private int xCoordinate;
     private int yCoordinate;
-    private int directionFacing;
+    private OrientationEnum directionFacing;
     private int plateauLength = 0;
     private int plateauHeight = 0;
 
@@ -45,68 +45,39 @@ public class Rover {
         this.plateauHeight = plateauHeight;
     }
 
-    public Rover(int plateauLength , int plateauHeight) {
-        /*
-        *
-        * Pleateau dimensions must be equal to or greater than 1 for the length anbd height
-        * Any other values will result in an invalid plateau ( either negat5ive length or height or 0 length or height, with dimensions set to 0,0
-        *
-         */
-        if( plateauHeight >=1 && plateauLength >= 1) {
-            this.plateauLength = plateauLength;
-            this.plateauHeight = plateauHeight;
-        } else {
-            this.plateauHeight = 0;
-            this.plateauLength = 0;
-        }
-    }
-
-    public boolean plateauIsValid() {
-        return ( this.plateauHeight > 0 && this.plateauLength > 0);
-    }
-
-
-
-    public Rover(int x, int y, int orientation, Integer... plateauDimensions) {
-            //here plateauDimensions are optional,  but if supplied, only 2 integers will successfully instantiate the object with the plateauDimensions.x and plateauDimensions.y set equal to the 2 options integers
-        this.xCoordinate = x;
-        this.yCoordinate = y;
-        this.directionFacing = orientation;
-
-       if(plateauDimensions != null && Arrays.asList(plateauDimensions).size() ==2) {
-           this.plateauLength = Arrays.asList(plateauDimensions).get(0).intValue();
-           this.plateauHeight = Arrays.asList(plateauDimensions).get(1).intValue();
-       } else if(plateauDimensions != null ) {
-           //  plateau dimensions are being set to 0 height and 0 length because there wasnt exactly 2 values supplied for the dimensions
-           this.plateauLength = 0;
-           this.plateauHeight = 0;
-       }
-    }
-
-    public int getxCoordinate() {
+    public int getXCoordinate() {
         return xCoordinate;
     }
 
-    public int getyCoordinate() {
-        return yCoordinate;
+    public int getYCoordinate() { return yCoordinate; }
+
+    public void setXCoordinate(int xCoordinate) { this.xCoordinate = xCoordinate; }
+
+    public void setYCoordinate(int yCoordinate) { this.yCoordinate = yCoordinate; }
+
+    public OrientationEnum getDirectionFacing() { return this.directionFacing; }
+
+    public void setDirectionFacing(OrientationEnum directionFacing) { this.directionFacing = directionFacing; }
+
+
+    public Rover(int plateauLength , int plateauHeight) {
+        /*
+         *
+         * Pleateau dimensions must be equal to or greater than 1 for the length anbd height
+         * Any other values will result in an invalid plateau ( either negative length or height or 0 length or height, with dimensions set to 0.  Use the default values in property file in this case
+         */
+        setPlateauLength(( plateauLength >= 1 ) ? plateauLength : Integer.parseInt(AppController.getProperties().getProperty("DEFAULT_PLATEAU_LENGTH")));
+        setPlateauHeight(( plateauHeight >= 1 ) ? plateauHeight : Integer.parseInt(AppController.getProperties().getProperty("DEFAULT_PLATEAU_HEIGHT")));
     }
 
-    public int getDirectionFacing() {
-        return directionFacing;
+    public Rover(int x, int y, int orientationIndex, Integer... plateauDimensions) {
+        //here plateauDimensions are optional,  but if supplied, only 2 integers will successfully instantiate the object with the plateauDimensions.x and plateauDimensions.y set equal to the 2 options integers
+        setXCoordinate(x);
+        setYCoordinate(y);
+        setDirectionFacing(OrientationEnum.values()[orientationIndex]);
+        setPlateauLength((plateauDimensions != null && Arrays.asList(plateauDimensions).size() ==2) ? Arrays.asList(plateauDimensions).get(0).intValue() :  Integer.parseInt(AppController.getProperties().getProperty("DEFAULT_PLATEAU_LENGTH")));
+        setPlateauHeight((plateauDimensions != null && Arrays.asList(plateauDimensions).size() ==2) ? Arrays.asList(plateauDimensions).get(1).intValue() : Integer.parseInt(AppController.getProperties().getProperty("DEFAULT_PLATEAU_HEIGHT")));
     }
-
-    public void setxCoordinate(int xCoordinate) {
-        this.xCoordinate = xCoordinate;
-    }
-
-    public void setyCoordinate(int yCoordinate) {
-        this.yCoordinate = yCoordinate;
-    }
-
-    public void setDirectionFacing(int directionFacing) {
-        this.directionFacing = directionFacing;
-    }
-
 
     private boolean doInstruction(String instr) {
         /*
@@ -120,17 +91,16 @@ public class Rover {
             switch (instr.toUpperCase()) {
 
                 case "L" :
-                            this.directionFacing = ( (this.directionFacing + 1)% 4);
+                            setDirectionFacing( OrientationEnum.values()[((getDirectionFacing().ordinal() + 1)% 4)]);
                             instrResult =  true;
                             break;
                 case "R" :
-                            this.directionFacing = (this.directionFacing >=1) ?    (  (this.directionFacing - 1) % 4) : 3 ;
+                            setDirectionFacing( (OrientationEnum.values()[((getDirectionFacing().ordinal() ))].ordinal() >= 1) ?     (OrientationEnum.values()[((getDirectionFacing().ordinal() -1 ) % 4)]) :  OrientationEnum.values()[3] );
                             instrResult = true;
                             break;
                 case "M" :
                             instrResult = moveRover();
                             break;
-
             }
 
             return instrResult;
@@ -141,9 +111,7 @@ public class Rover {
 
         char[] instructionChars = instructions.toCharArray();
         for (char instruction : instructionChars) {
-
             doInstruction(String.valueOf(instruction));
-
         }
     }
 
@@ -157,29 +125,29 @@ public class Rover {
          *       S(2)
          */
 
-        switch ( directionFacing) {
+        switch ( getDirectionFacing().ordinal() ) {
 
             case 0 :
-                     if(this.yCoordinate + 1 <= this.plateauHeight) {
-                         this.yCoordinate += 1;
+                     if( getYCoordinate() + 1 <= getPlateauHeight()) {
+                         setYCoordinate(getYCoordinate() + 1);
                          return true;
                      }
                      break;
             case 1 :
-                     if(this.xCoordinate -1 >= 0) {
-                         this.xCoordinate -= 1;
+                     if(getXCoordinate() -1 >= 0) {
+                         setXCoordinate(getXCoordinate() - 1);
                          return true;
                      }
                      break;
             case 2 :
-                     if(this.yCoordinate -1 >= 0) {
-                         this.yCoordinate -= 1;
+                     if(getYCoordinate() -1 >= 0) {
+                         setYCoordinate(getYCoordinate() - 1);
                          return true;
                      }
                      break;
             case 3 :
-                    if(this.xCoordinate +1 <= this.plateauLength ) {
-                        this.xCoordinate += 1;
+                    if(getXCoordinate() +1 <= getPlateauLength()) {
+                        setXCoordinate(getXCoordinate() + 1);
                         return true;
                     }
                      break;
@@ -190,31 +158,18 @@ public class Rover {
         return false;
     }
 
-
-    private String recodeOrientation(int orientation) {
-
-        switch (orientation) {
-            case 0  : return "N";
-            case 1 : return "W";
-            case 2 : return "S";
-            case 3 : return "E";
-
-            default :  return "Z";
-        }
-    }
-
     public void printLocation() {
-        System.out.println(this.xCoordinate + " " + this.yCoordinate + " " + recodeOrientation(this.directionFacing));
+        System.out.println(getXCoordinate() + " " + getYCoordinate() + " " + getDirectionFacing().name() );
     }
 
     @Override
     public String toString() {
         return "Rover{" +
-                "xCoordinate=" + xCoordinate +
-                ", yCoordinate=" + yCoordinate +
-                ", directionFacing=" + directionFacing +
-                ", plateauLength=" + plateauLength +
-                ", plateauHeight=" + plateauHeight +
+                "xCoordinate=" + getXCoordinate() +
+                ", yCoordinate=" + getYCoordinate() +
+                ", directionFacing=" + getDirectionFacing().name() +
+                ", plateauLength=" + getPlateauLength() +
+                ", plateauHeight=" + getPlateauHeight() +
                 '}';
     }
 }
