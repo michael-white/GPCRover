@@ -19,8 +19,8 @@ dependencies {
     implementation 'junit:junit:4.12' , 'org.apache.logging.log4j:log4j-core:2.13.3'
     testImplementation files('libs/junit-4.12.jar', 'libs/hamcrest-core-1.3.jar')
 }
-
-application {
-    mainModule = 'main.java.com.mbw.gpcrover.Application'
-    mainClass = 'main.java.com.mbw.gpcrover.Application.main'
-}
+//
+//application {
+//    mainModule = 'main.java.com.mbw.gpcrover.Application'
+//    mainClass = 'main.java.com.mbw.gpcrover.Application.main'
+//}
