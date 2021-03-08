@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group 'main.java.com.mbw.gpcrover'
+version '1.0.0'
+
+repositories {
+    jcenter()
+}
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+dependencies {
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    implementation 'junit:junit:4.12'
+    testCompile files('libs/junit-4.12.jar', 'libs/hamcrest-core-1.3.jar')
+}
