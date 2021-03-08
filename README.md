@@ -27,5 +27,5 @@ Once you have cloned or downloaded the repository from github,  from the project
     - rename your file to **rover_instructions.txt**
     - or change the value of **INSTRUCTION_FILE_NAME** ( in GPCRover/rover.properties ) to whatever you've named your file.
   - run the application and tests from the project root with 
-    - **gradlew run**
+    - **gradlew run**   ( this started to fail and I ran out of time to fix...  The project and tests still work,  i just mismanaged my time for the run script )
     - test results will be in **build\test-results\test** 
